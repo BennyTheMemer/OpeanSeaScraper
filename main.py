@@ -7,16 +7,19 @@ import gspread
 import time
 import pandas as pd
 
+#Init google sheets
+
 gc = gspread.service_account(filename='keys.json')
 sh = gc.open_by_url("https://docs.google.com/spreadsheets/d/1D7F-38GMfyJDVI9pmiQiiau5qHcHekLcMXN2qxkGjkI/edit#gid=0").sheet1
 datetime.today().strftime('%Y-%m-%d')
 
+#Init dictionary to later import to sheets
 dict = {
 "Project Site":[],	"Marketplace": [], "Floor" + " " + datetime.today().strftime('%d-%m'):[], "Owners":[], "Twitter": [], "Followers": []
 }
 
 def main():
-    driver = webdriver.Chrome(executable_path = "C:/Users/berna/Downloads/chromedriver_win32 (1)/chromedriver.exe")
+    driver = webdriver.Chrome(executable_path = "/path")
     driver.get("https://opensea.io/collection/crypto-raiders-characters")
 
     soup = bs(driver.page_source, 'html.parser')
@@ -31,6 +34,7 @@ def main():
     dict["Floor" + " " + datetime.today().strftime('%d-%m')].append(floorPrice)
     dict["Owners"].append(owners)
     dict["Twitter"].append(twitterHref)
+
     #Will leave the page to get twitter followers
     driver.get(twitterHref)
     time.sleep(4)
@@ -39,6 +43,7 @@ def main():
     dict["Followers"].append(followers)
     print(dict)
 
+    #Import to google sheets
     dataframe = pd.DataFrame.from_dict(dict)
     sh.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
 
